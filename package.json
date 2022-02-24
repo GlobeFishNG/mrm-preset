@@ -1,0 +1,16 @@
+{
+  "name": "@ngiq/mrm-preset",
+  "version": "1.0.0",
+  "description": "Neural Galaxy Node.js project preset",
+  "engines": {
+    "node": ">=14"
+  },
+  "main": "config.json",
+  "scripts": {},
+  "author": "GlobeFishNG",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "mrm-core": "^6.1.7"
+  }
+}
