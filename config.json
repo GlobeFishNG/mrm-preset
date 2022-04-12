@@ -5,14 +5,16 @@
       "docker",
       "npm",
       "typescript",
-      "openapi"
+      "openapi",
+      "ci"
     ],
     "service": [
       "base",
       "docker",
       "npm",
       "typescript",
-      "openapi"
+      "openapi",
+      "ci"
     ]
   }
 }

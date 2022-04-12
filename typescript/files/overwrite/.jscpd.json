@@ -1,0 +1,15 @@
+{
+  "threshold": 5,
+  "format": [
+    "typescript"
+  ],
+  "path": [
+    "src/**/*.ts"
+  ],
+  "reporters": [
+    "html",
+    "consoleFull"
+  ],
+  "output": "report/jscpd",
+  "absolute": false
+}

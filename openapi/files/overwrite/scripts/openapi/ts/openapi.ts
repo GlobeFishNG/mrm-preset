@@ -4,21 +4,21 @@ import * as Joi from '@hapi/joi';
 
 // tslint:disable: no-console
 
-export type SesNetwork = 'intranet-network' | 'access-network' | 'internal-data-network';
+export type NgNetwork = 'intranet-network' | 'access-network' | 'internal-data-network';
 
-export type SesApiInfo = SesExternalApiInfo | SesInternalApiInfo;
+export type NgApiInfo = NgExternalApiInfo | NgInternalApiInfo;
 
-export interface SesBasicApiInfo {
-  network: SesNetwork;
+export interface NgBasicApiInfo {
+  network: NgNetwork;
   basePath?: string;
 }
-export type SesExternalApiInfo = SesBasicApiInfo;
+export type NgExternalApiInfo = NgBasicApiInfo;
 
-export interface SesInternalApiInfo extends SesBasicApiInfo {
+export interface NgInternalApiInfo extends NgBasicApiInfo {
   port: number;
 }
 
-export const sesApiInfoJoiSchema = Joi.alternatives().match('all').try(
+export const ngApiInfoJoiSchema = Joi.alternatives().match('all').try(
   Joi.object().keys({
     basePath: Joi.string().min(0).allow('').optional(),
   }),

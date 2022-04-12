@@ -22,6 +22,7 @@ const gitIgnoresToAdd = [
   '!/test/node_modules/',
   'package-lock.json',
   '*.heapsnapshot',
+  '.npmrc',
   // OS
   '.DS_Store',
   'Thumbs.db',
@@ -52,7 +53,8 @@ const gitIgnoresToAdd = [
   // generated api source files
   'src/generated/',
   // generated gitlab page static files
-  '.typedoc'
+  '.typedoc',
+  '.eslintcache'
 ];
 
 function gitignore() {
@@ -86,14 +88,47 @@ function editorconfig() {
     .save();
 }
 
+function npmignore() {
+  lines('.npmignore')
+    .prepend([
+      '# First exclude everything',
+      '*',
+    ])
+    .add([
+      '!lib/**',
+    ])
+    .save();
+}
+
 function package(config) {
   const type = getConfig(config, 'type', 'service');
-  // const exportTypeScript = getConfig(config, 'exportTypeScript', false);
 
   const pkg = packageJson()
+    .set('main', 'lib/index.js')
     .set('config.type', type)
-    // .set('config.exportTypeScript', exportTypeScript)
-    .unset('config.exportTypeScript')
+    .set('scripty.silent', true)
+
+    .setScript('clean', 'SCRIPTY_PARALLEL=true scripty')
+    .setScript('build', 'scripty')
+    .setScript('compile', 'scripty')
+    .setScript('test', 'scripty')
+    .setScript('testall', 'scripty')
+    .setScript('_on_compile_success', 'scripty')
+    .setScript('_on_compile_failure', 'scripty')
+    .setScript('_copylib', 'mkdir -p lib && cp -R build/src/* lib/')
+    .setScript('cpd', 'jscpd')
+    .setScript('setup', 'scripts/setup.sh')  // Can not use scripty, because modules aren't install yet.
+    .addDependency('@types/chai')
+    .addDependency('@types/mocha')
+    .addDependency('chai')
+    .addDependency('jscpd')
+    .addDependency('mocha')
+    .addDependency('mrm')
+    .addDependency('scripty')
+    .addDependency('tsc-watch')
+    .addDependency('source-map-support')
+    .addDependency('trace')
+    .addDependency('clarify')
     .save();
 }
 
@@ -101,6 +136,7 @@ function task(config) {
   gitignore();
   gitattributes();
   editorconfig();
+  npmignore();
 
   makeDirs(['src', 'test', 'scripts', 'docs']);
   copyAllFiles(__dirname);

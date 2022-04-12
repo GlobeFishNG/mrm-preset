@@ -3,29 +3,28 @@ const { chmodSync } = require('fs');
 const {
   chmodAllSync,
   copyAllFiles,
-  getConfig} = require('../util');
+  getConfig,
+  isService,
+  isLib} = require('../util');
 const { packageJson } = require('../core');
 
 function package(config) {
   const type = getConfig(config, 'type', 'service'); // service/lib
-  const exportTypeScript = getConfig(config, 'exportTypeScript', false);
 
   const pkg = packageJson();
-  if (type === 'service') {      
-    if (exportTypeScript) {
-      pkg
-        .setScript('npm:login', './scripts/npm/login.sh')
-        .setScript('npm:logout', './scripts/npm/logout.sh')
-        // .setScript('npm:types:build', './scripts/npm/types/build.sh')
-        // .setScript('npm:types:publish', './scripts/npm/types/publish.sh')
-        .save();
-    } 
-  } else if (type === 'lib') {
+  if (isService(type)) {      
     pkg
-      .setScript('npm:login', './scripts/npm/login.sh')
-      .setScript('npm:logout', './scripts/npm/logout.sh')
-      .setScript('npm:build', './scripts/npm/build.sh')
-      .setScript('npm:publish', './scripts/npm/publish.sh')
+      .setScript('npm:login', 'scripty')
+      .setScript('npm:logout', 'scripty')
+      // .setScript('npm:types:build', './scripts/npm/types/build.sh')
+      // .setScript('npm:types:publish', './scripts/npm/types/publish.sh')
+      .save();
+  } else if (isLib(type)) {
+    pkg
+      .setScript('npm:login', 'scripty')
+      .setScript('npm:logout', 'scripty')
+      .setScript('npm:build', 'scripty')
+      .setScript('npm:publish', 'scripty')
       .save();
   }
 }
@@ -36,7 +35,6 @@ function task(config) {
   ]);
   copyAllFiles(__dirname);
   chmodAllSync('./scripts', '755');
-  chmodSync('./containers/build.sh', '755');
 
   package(config);
 }

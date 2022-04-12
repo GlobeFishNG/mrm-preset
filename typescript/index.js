@@ -48,11 +48,6 @@ function task(config) {
     .addDependency('@typescript-eslint/eslint-plugin')
     .save();
 
-  yaml('.cpd.yaml')
-    .merge({ languages: ['typescript'] })
-    .merge({ files: ['src/**/*.ts'] })
-    .save();
-
   // create lint rules in test folder
   // deleteFiles('test/tslint.yaml');
   // yaml('test/tslint.yaml', yaml('tslint.yaml').get())

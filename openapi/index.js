@@ -36,7 +36,7 @@ function task() {
     .addDependency('swagger-parser')
     .addDependency('ts-node')
     .addDependency('scripty')
-    .unset('productionDependencies')  // Fix: remove productDependencies that was introduced in 1.48.0.
+    .addDependency('@ngiq/nodejs-common', { type: 'product' })
     .save();
 }
 

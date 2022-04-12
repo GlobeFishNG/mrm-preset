@@ -1,0 +1,6 @@
+DEFAULT:
+  lines: 90       # target: 90
+  functions: 90   # target: 90
+  statements: 90  # target: 90
+  branches: 80    # target: 80
+  lint_warnings: 100
