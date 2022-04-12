@@ -7,7 +7,7 @@ const {
 const { packageJson } = require('../core');
 
 function package(config) {
-  const type = getConfig(config, 'type', 'service'); // service/frontend-lib/service-lib/web/desktop
+  const type = getConfig(config, 'type', 'service'); // service/lib
   const exportTypeScript = getConfig(config, 'exportTypeScript', false);
 
   const pkg = packageJson();
@@ -16,11 +16,11 @@ function package(config) {
       pkg
         .setScript('npm:login', './scripts/npm/login.sh')
         .setScript('npm:logout', './scripts/npm/logout.sh')
-        .setScript('npm:types:build', './scripts/npm/types/build.sh')
-        .setScript('npm:types:publish', './scripts/npm/types/publish.sh')
+        // .setScript('npm:types:build', './scripts/npm/types/build.sh')
+        // .setScript('npm:types:publish', './scripts/npm/types/publish.sh')
         .save();
     } 
-  } else if (type.match(/-lib$/)) {
+  } else if (type === 'lib') {
     pkg
       .setScript('npm:login', './scripts/npm/login.sh')
       .setScript('npm:logout', './scripts/npm/logout.sh')

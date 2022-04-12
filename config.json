@@ -1,12 +1,18 @@
 {
   "aliases": {
     "all": [
-      "base"
+      "base",
+      "docker",
+      "npm",
+      "typescript",
+      "openapi"
     ],
     "service": [
       "base",
       "docker",
-      "npm"
+      "npm",
+      "typescript",
+      "openapi"
     ]
   }
 }

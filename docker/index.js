@@ -7,7 +7,7 @@ const {
 const { packageJson } = require('../core');
 
 function package(config) {
-  const type = getConfig(config, 'type', 'service'); // service/frontend-lib/service-lib/web/desktop
+  const type = getConfig(config, 'type', 'service'); // service/lib
 
   if (type.match(/service/)) {
     const pkg = packageJson()

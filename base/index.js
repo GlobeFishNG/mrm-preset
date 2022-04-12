@@ -87,12 +87,13 @@ function editorconfig() {
 }
 
 function package(config) {
-  const type = getConfig(config, 'type', 'service'); // service/frontend-lib/service-lib/web/desktop
-  const exportTypeScript = getConfig(config, 'exportTypeScript', false);
+  const type = getConfig(config, 'type', 'service');
+  // const exportTypeScript = getConfig(config, 'exportTypeScript', false);
 
   const pkg = packageJson()
     .set('config.type', type)
-    .set('config.exportTypeScript', exportTypeScript)
+    // .set('config.exportTypeScript', exportTypeScript)
+    .unset('config.exportTypeScript')
     .save();
 }
 
