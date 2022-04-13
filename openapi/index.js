@@ -13,7 +13,8 @@ function task(config) {
       .setScript('compile:genapicode', 'scripty')
       .setScript('openapi:codegen', 'scripty')
       .setScript('openapi:dev', 'scripty')
-      .addDependency('@types/body-parser')
+      .setScript('openapi:watch', 'yarn nodemon -e ts -w src -x yarn openapi:dev')
+      // .addDependency('@types/body-parser')
       .addDependency('@types/ejs')
       .addDependency('@types/express')
       .addDependency('@types/joi')
@@ -23,7 +24,7 @@ function task(config) {
       .addDependency('@types/helmet')
       .addDependency('@types/hapi__joi')
       .addDependency('@hapi/joi', { type: 'product' })
-      .addDependency('body-parser', { type: 'product' })
+      // .addDependency('body-parser', { type: 'product' })
       .addDependency('ejs', { type: 'product' })
       .addDependency('express', { type: 'product' })
       .addDependency('helmet', { type: 'product' })
@@ -40,6 +41,7 @@ function task(config) {
       .addDependency('ts-node')
       .addDependency('scripty')
       .addDependency('@ngiq/nodejs-common', { type: 'product' })
+      .addDependency('nodemon')
       .save();
   }
 }

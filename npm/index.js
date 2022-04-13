@@ -16,14 +16,11 @@ function package(config) {
     pkg
       .setScript('npm:login', 'scripty')
       .setScript('npm:logout', 'scripty')
-      // .setScript('npm:types:build', './scripts/npm/types/build.sh')
-      // .setScript('npm:types:publish', './scripts/npm/types/publish.sh')
       .save();
   } else if (isLib(type)) {
     pkg
       .setScript('npm:login', 'scripty')
       .setScript('npm:logout', 'scripty')
-      .setScript('npm:build', 'scripty')
       .setScript('npm:publish', 'scripty')
       .save();
   }

@@ -1,0 +1,18 @@
+import { Exception } from '@ngiq/nodejs-common';
+
+interface HttpErrorObject {
+  serviceCode: string;
+  operationId: string;
+  statusCode: number;
+  errorMsg?: string;
+}
+
+class HttpError extends Exception {
+  constructor(message: string, code: string, readonly valueObject: HttpErrorObject) {
+    super(message, code, valueObject);
+  }
+}
+
+export {
+  HttpError
+};

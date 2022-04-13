@@ -14,6 +14,7 @@ import * as SwaggerParser from 'swagger-parser';
 interface RenderOperation {
   name: string;
   method: string;
+  operationCode: string;
   validator: {
     query?: string;
     params?: string;
@@ -55,9 +56,9 @@ const routerProcessorHeader =
 
 import * as express from 'express';
 
-export const defaultRequestHandler = (_req: express.Request, res: express.Response, _next: express.NextFunction) => {
+export const defaultRequestHandler = (req: express.Request, res: express.Response, _next: express.NextFunction) => {
   res.setHeader('content-type', 'application/json');
-  res.status(200).end();
+  res.status(req.method === 'POST' ? 201: 200).end();
 };
 `;
 
@@ -65,6 +66,7 @@ const internalAppProcessorHeader =
 `/* eslint-disable prefer-arrow/prefer-arrow-functions */
 
 import * as express from 'express';
+import { HttpError } from './http-error';
 `;
 
 const externalAppProcessorHeader =
@@ -72,6 +74,7 @@ const externalAppProcessorHeader =
 
 import * as https from 'https';
 import * as express from 'express';
+import { HttpError } from './http-error';
 
 export interface HttpServerOptions {
   port: number;
@@ -109,9 +112,20 @@ const useCustomizedHandlerAfterRouterContent =
 const errorHandler = 'function errorHandler';
 const errorHandlerContent =
 `export function errorHandler(
-  _err: any, _req: express.Request, _res: express.Response, next: express.NextFunction): void {
+  err: any, _req: express.Request, res: express.Response, next: express.NextFunction): void {
   // TODO: add customized errorHandler here
-  return next();
+  if (err instanceof HttpError) {
+    const errorDetails = err.valueObject;
+    res.status(err.valueObject.statusCode).json({
+      errorCode: \`\${errorDetails.serviceCode}-\${errorDetails.operationId}-003\`,
+      errorMsg: \`Invalid request:\${errorDetails.errorMsg}!\`,
+    });
+  } else {
+    res.status(500).json({
+      errorCode: 'N/A',
+      errorMsg: 'N/A',
+    });
+  }
 }`;
 
 const healthCheck = 'function healthCheck';
@@ -125,7 +139,7 @@ const healthCheckContent =
 const apps: string[] = [];
 
 // tslint:disable-next-line: max-union-size
-function getTemplateFile(type: 'router.ts' | 'function' | 'external.ts' | 'internal.ts' | 'main.ts'): string {
+function getTemplateFile(type: 'router.ts' | 'function' | 'external.ts' | 'internal.ts' | 'main.ts' | 'http-error.ts'): string {
   return `${templatesDir}/${type}.ejs`;
 }
 
@@ -136,6 +150,11 @@ async function main(): Promise<void> {
     await generateApiCode(yamlFile);
   }
 
+  generateMainFile();
+  generateHttpErrorFile();
+}
+
+function generateMainFile() {
   const result = ejs.render(fs.readFileSync(getTemplateFile('main.ts'), { encoding: 'utf8' }), 
   { 
     apps,
@@ -143,6 +162,12 @@ async function main(): Promise<void> {
   });
   const mainFilePath = path.join('./src/main.ts');
   fs.writeFileSync(mainFilePath, result);
+}
+
+function generateHttpErrorFile() {
+  const result = ejs.render(fs.readFileSync(getTemplateFile('http-error.ts'), { encoding: 'utf8' }));
+  const httpErrorFilePath = path.join('./src/http-error.ts');
+  fs.writeFileSync(httpErrorFilePath, result);
 }
 
 function parsePath(
@@ -164,10 +189,16 @@ function parsePath(
       throw new Error(`uri: ${key}, operation: ${operation} don't have a operationId`);
     }
 
+    if ((operationObj as any)['x-operation-code'] === undefined) {
+      console.warn('--> uri=', key, ', operation=', operation, 'misses x-operation-code');
+      throw new Error(`uri: ${key}, operation: ${operation} don't have a x-operation-code`);
+    }
+
     const operationId = _.camelCase(operationObj.operationId);
     const renderOperation: RenderOperation = {
       name: _.upperFirst(operationId),
       method: operation,
+      operationCode: (operationObj as any)['x-operation-code'],
       validator: {},
     };
 
@@ -345,6 +376,21 @@ async function generateApiCode(yamlFile: string): Promise<void> {
 
   const oasApi = api;
 
+  let xNgApiInfo = <NgApiInfo>_.get(oasApi, 'x-neuralgalaxy-api-info');
+
+  const joiRet = ngApiInfoJoiSchema.validate(xNgApiInfo, {
+    allowUnknown: true,
+    convert: true,
+    stripUnknown: { objects: true, arrays: false, },
+  });
+
+  if (joiRet.error) {
+    console.warn('--> API yaml doesn\'t include valid x-neuralgalaxy-api-info', joiRet.error.details[0].message);
+    throw new Error('API yaml doesn\'t include valid x-neuralgalaxy-api-info');
+  }
+
+  xNgApiInfo = <NgApiInfo>joiRet.value;
+
   const apiPaths = parsePaths(oasApi, bundledComponents, $refs);
 
   const joiSchemas =  js2joi.resolveBundledJSONSchema(<{[k: string]: JSONSchema4}>bundledComponents.schemas, { rootSchema: { components: bundledComponents }});
@@ -371,11 +417,11 @@ async function generateApiCode(yamlFile: string): Promise<void> {
 
   const fileInfo = path.parse(yamlFile);
   fileInfo.name = _.kebabCase(fileInfo.name);
-
   const ejsResult = ejs.render(fs.readFileSync(getTemplateFile('router.ts')).toString('utf8'),
   {
     paths: apiPaths,
     apiName: fileInfo.name,
+    apiCode: xNgApiInfo.serviceCode,
     bundledJoiStrings,
   });
 
@@ -400,21 +446,6 @@ async function generateApiCode(yamlFile: string): Promise<void> {
   });
 
   await appendFunctionsToTsFile(routerAppendFileInfo);
-
-  let xNgApiInfo = <NgApiInfo>_.get(oasApi, 'x-neuralgalaxy-api-info');
-
-  const joiRet = ngApiInfoJoiSchema.validate(xNgApiInfo, {
-    allowUnknown: true,
-    convert: true,
-    stripUnknown: { objects: true, arrays: false, },
-  });
-
-  if (joiRet.error) {
-    console.warn('--> API yaml doesn\'t include valid x-neuralgalaxy-api-info', joiRet.error.details[0].message);
-    throw new Error('API yaml doesn\'t include valid x-neuralgalaxy-api-info');
-  }
-
-  xNgApiInfo = <NgApiInfo>joiRet.value;
 
   const app = {
     name: fileInfo.name,

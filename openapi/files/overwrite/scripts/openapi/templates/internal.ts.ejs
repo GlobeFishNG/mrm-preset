@@ -8,9 +8,9 @@
 // ------- automatically generated code start ---------
 
 import * as express from 'express';
-import * as bodyParser from 'body-parser';
 import * as http from 'http';
 import * as https from 'https';
+import { applog, startInternalService, addTransactionId } from '@ngiq/nodejs-common';
 import { router } from './access/<%= app.name %>.router';
 import {
   useCustomizedHandlerBeforeRouter,
@@ -36,12 +36,9 @@ export async function stop(): Promise<void> {
 
 export function server(): express.Express {
   const app = express();
-  app.use(bodyParser.json());
-  app.use(expressTrace.trace({
-    serviceName: utils.getModuleName()!,
-    setHeader: true
-  }));
+  app.use(express.json());
   app.get('/health', healthCheck);
+  app.use(addTransactionId);
   useCustomizedHandlerBeforeRouter(app);
 <% if (!app.basePath) { -%>
   app.use(router());

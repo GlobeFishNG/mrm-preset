@@ -11,9 +11,9 @@ export NODE_ENV=development
 
 if [[ $1 == 'ALL' ]] ; then
   echo "Note: 'testall' runs scripts with prefix 'skip-' as well."
-  mocha --exit --trace-warnings -r source-map-support/register -c "build/test/**/@(skip|test)-*.js" 3>&2 2>&1 1>&3- | bunyan -L -o short -l fatal &
+  mocha --exit --trace-warnings -r source-map-support/register -c "build/test/**/@(skip-|)*.unit.test.js" 3>&2 2>&1 1>&3- | bunyan -L -o short -l fatal &
 else
-  mocha --exit --trace-warnings -r source-map-support/register -c "build/test/**/@(test-*$1*|$1).js" 3>&2 2>&1 1>&3- | bunyan -L -o short &
+  mocha --exit --trace-warnings -r source-map-support/register -c "build/test/**/@(*$1*|$1*.unit.test).js" 3>&2 2>&1 1>&3- | bunyan -L -o short &
 fi
 
 # yarn doc > /dev/null &

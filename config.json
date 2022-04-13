@@ -6,7 +6,8 @@
       "npm",
       "typescript",
       "openapi",
-      "ci"
+      "ci",
+      "dependency"
     ],
     "service": [
       "base",
@@ -14,7 +15,8 @@
       "npm",
       "typescript",
       "openapi",
-      "ci"
+      "ci",
+      "dependency"
     ]
   }
 }

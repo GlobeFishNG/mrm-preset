@@ -23,7 +23,7 @@ echo '(Detail log and report are generated under reports folder)'
 
 mkdir -p reports
 
-nyc mocha --exit -r source-map-support/register --reporter mochawesome --reporter-options reportDir=reports/testcase,reportFilename=index,quiet=true 'build/test/**/test-*.js' 3>&2 2>&1 1>&3- | tee reports/testlog.json | bunyan -L -o short -l fatal
+nyc mocha --exit -r source-map-support/register --reporter mochawesome --reporter-options reportDir=reports/testcase,reportFilename=index,quiet=true 'build/test/**/*.unit.test.js' 3>&2 2>&1 1>&3- | tee reports/testlog.json | bunyan -L -o short -l fatal
 
 nyc check-coverage --lines ${lines} --functions ${functions} --statements ${statements} --branches ${branches}
 

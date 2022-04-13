@@ -11,6 +11,7 @@ export type NgApiInfo = NgExternalApiInfo | NgInternalApiInfo;
 export interface NgBasicApiInfo {
   network: NgNetwork;
   basePath?: string;
+  serviceCode: string;
 }
 export type NgExternalApiInfo = NgBasicApiInfo;
 
@@ -21,6 +22,7 @@ export interface NgInternalApiInfo extends NgBasicApiInfo {
 export const ngApiInfoJoiSchema = Joi.alternatives().match('all').try(
   Joi.object().keys({
     basePath: Joi.string().min(0).allow('').optional(),
+    serviceCode: Joi.string().min(2).max(2).required(),
   }),
   Joi.alternatives().match('one').try(
     Joi.object().keys({

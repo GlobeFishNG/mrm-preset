@@ -7,9 +7,12 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 // ------- automatically generated code start ---------
 
+import { applog } from '@ngiq/nodejs-common';
 <% apps.forEach((app, i) => { -%>
 import * as <%= appModules[i] %>App from './<%= app %>.app';
 <% }); -%>
+
+const logger = applog.logger('main');
 
 <% apps.forEach((app, i) => { -%>
 <%= appModules[i] %>App.start()
