@@ -27,7 +27,9 @@ password=$(aws ssm get-parameter --name /common/cicd/jenkins/${username}_passwor
 npx npm-cli-login \
   -u ${NGIQ_NPM_USERNAME} -p ${password} \
   -e ${NGIQ_NPM_USERNAME}@neuralgalaxy.com \
-  -r https://${NGIQ_NPM_REGISTRY_HOST}/${NGIQ_NPM_REGISTRY_URI}
+  -r https://${NGIQ_NPM_REGISTRY_HOST}/${NGIQ_NPM_REGISTRY_URI} \
+  -s "@ngiq" \
+  --config-path .npmrc
 
 echo "Login NPM Registry succeeded"
 

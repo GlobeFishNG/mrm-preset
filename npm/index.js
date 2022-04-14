@@ -14,14 +14,14 @@ function package(config) {
   const pkg = packageJson();
   if (isService(type)) {      
     pkg
-      .setScript('npm:login', 'scripty')
-      .setScript('npm:logout', 'scripty')
+      .setScript('npm:login', './scripts/npm/login.sh')
+      .setScript('npm:logout', './scripts/npm/logout.sh')
       .save();
   } else if (isLib(type)) {
     pkg
-      .setScript('npm:login', 'scripty')
-      .setScript('npm:logout', 'scripty')
-      .setScript('npm:publish', 'scripty')
+      .setScript('npm:login', './scripts/npm/login.sh')
+      .setScript('npm:logout', './scripts/npm/login.sh')
+      .setScript('npm:publish', './scripts/npm/publish.sh')
       .save();
   }
 }

@@ -1,0 +1,9 @@
+ngiq-xnat-manager:
+  codeowners:
+    - GlobeFishNG
+'@ngiq/nodejs-common':
+  codeowners:
+    - GlobeFishNG
+DEFAULT:
+  codeowners:
+    - GlobeFishNG

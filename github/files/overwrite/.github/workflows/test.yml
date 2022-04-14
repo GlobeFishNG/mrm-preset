@@ -1,0 +1,34 @@
+name: test
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  test:
+    runs-on: [self-hosted, linux, x64, aws-us]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - name: Run CI Script
+        run: |
+          npm install -g yarn
+          yarn npm:login
+          yarn install 
+          yarn npm:logout
+          yarn ci
+      - name: Collect CI Reports
+        run: tar -czf report-${{ github.sha }}.tar.gz report/
+      - name: Upload CI Reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: CI Reports
+          path: report-${{ github.sha }}.tar.gz
+          if-no-files-found: error

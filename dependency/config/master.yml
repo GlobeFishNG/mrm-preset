@@ -67,6 +67,10 @@ devDependencies:
   typescript: 4.6.3
   typescript-formatter: 7.2.2
   nodemon: 2.0.15
+  doctoc: 2.1.0
+  node-fetch: 2.6.0
+  plantuml-encoder: 1.4.0
+  redoc-cli: 0.13.10
 resolutions:
   "@ngiq/nodejs-common": "*"
   typescript: "*"

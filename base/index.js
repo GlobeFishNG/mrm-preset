@@ -107,7 +107,7 @@ function package(config) {
     .set('main', 'lib/index.js')
     .set('config.type', type)
     .set('scripty.silent', true)
-
+    .set('license', 'SEE LICENSE IN LICENSE.TXT')
     .setScript('clean', 'SCRIPTY_PARALLEL=true scripty')
     .setScript('build', 'scripty')
     .setScript('compile', 'scripty')

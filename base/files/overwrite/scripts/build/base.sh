@@ -5,7 +5,7 @@ set -euo pipefail
 yarn clean
 
 yarn format &
-# yarn doc &
+yarn doc &
 wait
 
 yarn compile

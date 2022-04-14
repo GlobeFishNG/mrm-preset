@@ -16,7 +16,7 @@ else
   mocha --exit --trace-warnings -r source-map-support/register -c "build/test/**/@(*$1*|$1*.unit.test).js" 3>&2 2>&1 1>&3- | bunyan -L -o short &
 fi
 
-# yarn doc > /dev/null &
+yarn doc > /dev/null &
 yarn _copylib > /dev/null &
 
 wait
