@@ -1,0 +1,24 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  npm_publish:
+    runs-on: [self-hosted, linux, x64, aws-us]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - name: Publish ${npm_package_name}
+        run: |
+          npm install -g yarn
+          yarn npm:login true
+          yarn install
+          yarn npm:publish
+          yarn npm:logout

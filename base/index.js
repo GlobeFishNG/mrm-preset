@@ -13,6 +13,7 @@ const gitIgnoresToRemove = [
   '.github/',
   '*.js',
   'npm-shrinkwrap.json',
+  'src/generated/',
 ];
 
 const gitIgnoresToAdd = [
@@ -51,7 +52,7 @@ const gitIgnoresToAdd = [
   '*.bak',
   '*.swp',
   // generated api source files
-  'src/generated/',
+  // 'src/generated/',
   // generated gitlab page static files
   '.typedoc',
   '.eslintcache'

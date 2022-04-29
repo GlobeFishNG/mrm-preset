@@ -10,7 +10,7 @@
 import * as express from 'express';
 import * as http from 'http';
 import * as https from 'https';
-import { applog, startInternalService, addTransactionId } from '@ngiq/nodejs-common';
+import { applog, startInternalService, addTransactionId, httpLog } from '@ngiq/nodejs-common';
 import { router } from './access/<%= app.name %>.router';
 import {
   useCustomizedHandlerBeforeRouter,
@@ -39,6 +39,7 @@ export function server(): express.Express {
   app.use(express.json());
   app.get('/health', healthCheck);
   app.use(addTransactionId);
+  app.use(httpLog);
   useCustomizedHandlerBeforeRouter(app);
 <% if (!app.basePath) { -%>
   app.use(router());

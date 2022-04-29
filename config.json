@@ -9,7 +9,8 @@
       "ci",
       "github",
       "document",
-      "dependency"
+      "dependency",
+      "license"
     ],
     "service": [
       "base",
@@ -20,7 +21,8 @@
       "ci",
       "github",
       "document",
-      "dependency"
+      "dependency",
+      "license"
     ]
   }
 }

@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const { join } = require('path');
 const { yaml, template, makeDirs } = require('mrm-core');
-const { copyAllFiles, readPackageJson } = require('../util');
+const { copyAllFiles, readPackageJson, isLib, getConfig } = require('../util');
 
 function codeOwners(name) {
   const config = yaml(join(__dirname, `config/codeowners.yml`));
@@ -23,10 +23,17 @@ function codeOwners(name) {
 function task(config) {
   const { name } = readPackageJson();
   makeDirs([
-    '.github/', 
+    '.github/workflows', 
   ]);
   copyAllFiles(__dirname);
   codeOwners(name);
+
+  const type = getConfig(config, 'type', 'service');
+  if (isLib(type)) {
+    template('.github/workflows/publish.yml', join(__dirname, `files/template/publish.yml`))
+    .apply({ npm_package_name: name })
+    .save();
+  }
 }
 
 task.description = 'Adds Github config files';

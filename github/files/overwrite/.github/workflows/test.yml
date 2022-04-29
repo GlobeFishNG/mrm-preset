@@ -25,10 +25,10 @@ jobs:
           yarn npm:logout
           yarn ci
       - name: Collect CI Reports
-        run: tar -czf report-${{ github.sha }}.tar.gz report/
+        run: tar -czf reports-${{ github.sha }}.tar.gz reports/
       - name: Upload CI Reports
         uses: actions/upload-artifact@v2
         with:
           name: CI Reports
-          path: report-${{ github.sha }}.tar.gz
+          path: reports-${{ github.sha }}.tar.gz
           if-no-files-found: error

@@ -9,7 +9,7 @@
 
 import * as express from 'express';
 import * as Joi from '@hapi/joi';
-import { HttpError } from '../http-error';
+import { createHttpError, HttpErrorCode, traceSession } from '@ngiq/nodejs-common';
 import * as processor from './<%= apiName %>.routerprocessor';
 
 <%- bundledJoiStrings %>
@@ -29,16 +29,15 @@ function validate<%= operation.name %>(
   req: express.Request,
   _res: express.Response,
   next: express.NextFunction): void {
+  traceSession.setData('serviceCode', '<%= apiCode %>');
+  traceSession.setData('operationId', '<%= operation.operationCode %>');
   let result: Joi.ValidationResult;
 <% for(let key in operation.validator) { -%>
   result = <%= operation.validator[key] %>.validate(req.<%= key %>);
   if (result.error) {
-    return next(new HttpError('validate<%= operation.name %> failed!', '400', {
-      statusCode: 400,
-      operationId: '<%= operation.operationCode %>',
-      serviceCode: '<%= apiCode %>',
-      errorMsg: result.error.message,
-    }));
+    return next(
+      createHttpError(HttpErrorCode.BadRequest, result.error.message)
+    );
   }
 <% } -%>
   return next();

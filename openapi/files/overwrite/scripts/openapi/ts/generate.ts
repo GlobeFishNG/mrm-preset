@@ -63,18 +63,18 @@ export const defaultRequestHandler = (req: express.Request, res: express.Respons
 `;
 
 const internalAppProcessorHeader =
-`/* eslint-disable prefer-arrow/prefer-arrow-functions */
+`/* eslint-disable */
 
 import * as express from 'express';
-import { HttpError } from './http-error';
+import { HttpError } from '@ngiq/nodejs-common';
 `;
 
 const externalAppProcessorHeader =
-`/* eslint-disable prefer-arrow/prefer-arrow-functions */
+`/* eslint-disable */
 
 import * as https from 'https';
 import * as express from 'express';
-import { HttpError } from './http-error';
+import { HttpError } from '@ngiq/nodejs-common';
 
 export interface HttpServerOptions {
   port: number;
@@ -117,7 +117,7 @@ const errorHandlerContent =
   if (err instanceof HttpError) {
     const errorDetails = err.valueObject;
     res.status(err.valueObject.statusCode).json({
-      errorCode: \`\${errorDetails.serviceCode}-\${errorDetails.operationId}-003\`,
+      errorCode: \`\${errorDetails.serviceCode}-\${errorDetails.operationId}--\${err.code}\`,
       errorMsg: \`Invalid request:\${errorDetails.errorMsg}!\`,
     });
   } else {
@@ -139,7 +139,7 @@ const healthCheckContent =
 const apps: string[] = [];
 
 // tslint:disable-next-line: max-union-size
-function getTemplateFile(type: 'router.ts' | 'function' | 'external.ts' | 'internal.ts' | 'main.ts' | 'http-error.ts'): string {
+function getTemplateFile(type: 'router.ts' | 'function' | 'external.ts' | 'internal.ts' | 'main.ts'): string {
   return `${templatesDir}/${type}.ejs`;
 }
 
@@ -151,7 +151,7 @@ async function main(): Promise<void> {
   }
 
   generateMainFile();
-  generateHttpErrorFile();
+  // generateHttpErrorFile();
 }
 
 function generateMainFile() {
@@ -164,11 +164,11 @@ function generateMainFile() {
   fs.writeFileSync(mainFilePath, result);
 }
 
-function generateHttpErrorFile() {
-  const result = ejs.render(fs.readFileSync(getTemplateFile('http-error.ts'), { encoding: 'utf8' }));
-  const httpErrorFilePath = path.join('./src/http-error.ts');
-  fs.writeFileSync(httpErrorFilePath, result);
-}
+// function generateHttpErrorFile() {
+//   const result = ejs.render(fs.readFileSync(getTemplateFile('http-error.ts'), { encoding: 'utf8' }));
+//   const httpErrorFilePath = path.join('./src/http-error.ts');
+//   fs.writeFileSync(httpErrorFilePath, result);
+// }
 
 function parsePath(
   apiPath: OpenAPIV3.PathItemObject, key: string,
