@@ -1,6 +1,6 @@
 import { generateFileList } from './utils';
 import { OpenAPIV3 } from 'openapi-types';
-import { validateYaml, isSwagger, NgApiInfo, ngApiInfoJoiSchema, bundleYaml } from './openapi';
+import { validateYaml, isSwagger, bundleYaml } from './openapi';
 import * as _ from 'lodash';
 import { JSONSchema4 } from 'json-schema';
 import * as js2joi from 'json-schema-to-joi';
@@ -69,33 +69,33 @@ import * as express from 'express';
 import { HttpError } from '@ngiq/nodejs-common';
 `;
 
-const externalAppProcessorHeader =
-`/* eslint-disable */
+// const externalAppProcessorHeader =
+// `/* eslint-disable */
 
-import * as https from 'https';
-import * as express from 'express';
-import { HttpError } from '@ngiq/nodejs-common';
+// import * as https from 'https';
+// import * as express from 'express';
+// import { HttpError } from '@ngiq/nodejs-common';
 
-export interface HttpServerOptions {
-  port: number;
-}
+// export interface HttpServerOptions {
+//   port: number;
+// }
 
-export interface HttpsServerOptions extends HttpServerOptions {
-  httpsOptions: https.ServerOptions;
-}
-`;
+// export interface HttpsServerOptions extends HttpServerOptions {
+//   httpsOptions: https.ServerOptions;
+// }
+// `;
 
-const getHttpServerOptions = 'function getHttpServerOptions';
-const getHttpServerOptionsContent =
-`export function getHttpServerOptions(): HttpServerOptions {
-  // TODO: extend https.ServerOptions by adding customized parameters
-}`;
+// const getHttpServerOptions = 'function getHttpServerOptions';
+// const getHttpServerOptionsContent =
+// `export function getHttpServerOptions(): HttpServerOptions {
+//   // TODO: extend https.ServerOptions by adding customized parameters
+// }`;
 
-const getHttpsServerOptions = 'function getHttpsServerOptions';
-const getHttpsServerOptionsContent =
-`export function getHttpsServerOptions(): HttpsServerOptions {
-  // TODO: extend https.ServerOptions by adding customized parameters
-}`;
+// const getHttpsServerOptions = 'function getHttpsServerOptions';
+// const getHttpsServerOptionsContent =
+// `export function getHttpsServerOptions(): HttpsServerOptions {
+//   // TODO: extend https.ServerOptions by adding customized parameters
+// }`;
 
 const useCustomizedHandlerBeforeRouter = 'function useCustomizedHandlerBeforeRouter';
 const useCustomizedHandlerBeforeRouterContent =
@@ -117,7 +117,7 @@ const errorHandlerContent =
   if (err instanceof HttpError) {
     const errorDetails = err.valueObject;
     res.status(err.valueObject.statusCode).json({
-      errorCode: \`\${errorDetails.serviceCode}-\${errorDetails.operationId}--\${err.code}\`,
+      errorCode: \`\${errorDetails.serviceCode}-\${errorDetails.operationId}-\${err.code}\`,
       errorMsg: errorDetails.errorMsg,
     });
   } else {
@@ -178,7 +178,7 @@ function parsePath(
     operations: [],
   };
 
-  apiOperations.forEach((operation) => {
+  apiOperations.forEach((operation, index) => {
     const operationObj: OpenAPIV3.OperationObject = <OpenAPIV3.OperationObject>_.get(apiPath, operation);
     if (!operationObj) {
       return;
@@ -189,16 +189,16 @@ function parsePath(
       throw new Error(`uri: ${key}, operation: ${operation} don't have a operationId`);
     }
 
-    if ((operationObj as any)['x-operation-code'] === undefined) {
-      console.warn('--> uri=', key, ', operation=', operation, 'misses x-operation-code');
-      throw new Error(`uri: ${key}, operation: ${operation} don't have a x-operation-code`);
-    }
+    // if ((operationObj as any)['x-operation-code'] === undefined) {
+    //   console.warn('--> uri=', key, ', operation=', operation, 'misses x-operation-code');
+    //   throw new Error(`uri: ${key}, operation: ${operation} don't have a x-operation-code`);
+    // }
 
     const operationId = _.camelCase(operationObj.operationId);
     const renderOperation: RenderOperation = {
       name: _.upperFirst(operationId),
       method: operation,
-      operationCode: (operationObj as any)['x-operation-code'],
+      operationCode: `${pathIndex.toString(16)}${index.toString(16)}`,
       validator: {},
     };
 
@@ -341,8 +341,11 @@ function parsePathParameters(
   }
 }
 
+let pathIndex = 0;
+
 function parsePaths(api: OpenAPIV3.Document, components: OpenAPIV3.ComponentsObject, $refs: SwaggerParser.$Refs): RenderPath[] {
   return _.map(api.paths, (apiPath, key) => {
+    pathIndex++;
     return parsePath(apiPath, key, components, $refs);
   });
 }
@@ -376,20 +379,34 @@ async function generateApiCode(yamlFile: string): Promise<void> {
 
   const oasApi = api;
 
-  let xNgApiInfo = <NgApiInfo>_.get(oasApi, 'x-neuralgalaxy-api-info');
+  const servers = oasApi.servers;
 
-  const joiRet = ngApiInfoJoiSchema.validate(xNgApiInfo, {
-    allowUnknown: true,
-    convert: true,
-    stripUnknown: { objects: true, arrays: false, },
-  });
-
-  if (joiRet.error) {
-    console.warn('--> API yaml doesn\'t include valid x-neuralgalaxy-api-info', joiRet.error.details[0].message);
-    throw new Error('API yaml doesn\'t include valid x-neuralgalaxy-api-info');
+  if (servers && servers.length === 0) {
+    console.warn('API server should contain port and basePath');
+    throw new Error('API server should contain port and basePath');
   }
 
-  xNgApiInfo = <NgApiInfo>joiRet.value;
+  const url = new URL(servers![0].url);
+
+  if (!url.port || !url.pathname) {
+    console.warn('API server should contain port and basePath');
+    throw new Error('API server should contain port and basePath');
+  }
+
+  // let xNgApiInfo = <NgApiInfo>_.get(oasApi, 'x-neuralgalaxy-api-info');
+
+  // const joiRet = ngApiInfoJoiSchema.validate(xNgApiInfo, {
+  //   allowUnknown: true,
+  //   convert: true,
+  //   stripUnknown: { objects: true, arrays: false, },
+  // });
+
+  // if (joiRet.error) {
+  //   console.warn('--> API yaml doesn\'t include valid x-neuralgalaxy-api-info', joiRet.error.details[0].message);
+  //   throw new Error('API yaml doesn\'t include valid x-neuralgalaxy-api-info');
+  // }
+
+  // xNgApiInfo = <NgApiInfo>joiRet.value;
 
   const apiPaths = parsePaths(oasApi, bundledComponents, $refs);
 
@@ -421,7 +438,7 @@ async function generateApiCode(yamlFile: string): Promise<void> {
   {
     paths: apiPaths,
     apiName: fileInfo.name,
-    apiCode: xNgApiInfo.serviceCode,
+    apiCode: process.env.npm_package_name,
     bundledJoiStrings,
   });
 
@@ -449,7 +466,9 @@ async function generateApiCode(yamlFile: string): Promise<void> {
 
   const app = {
     name: fileInfo.name,
-    ...xNgApiInfo,
+    port: url.port,
+    basePath: url.pathname,
+    // ...xNgApiInfo,
   };
 
   const appFileName = path.join(tsDir, fileInfo.name + '.app.ts');
@@ -471,21 +490,21 @@ async function generateApiCode(yamlFile: string): Promise<void> {
       fullContent: healthCheckContent,
     }],
   };
-  if (xNgApiInfo.network === 'internal-data-network') {
+  // if (xNgApiInfo.network === 'internal-data-network') {
     appFileContent = ejs.render(fs.readFileSync(getTemplateFile('internal.ts'), { encoding: 'utf8' }), { app });
     appendInfo.header = internalAppProcessorHeader;
-  } else {
-    appFileContent = ejs.render(fs.readFileSync(getTemplateFile('external.ts'), { encoding: 'utf8' }), { app });
-    appendInfo.header = externalAppProcessorHeader;
-    appendInfo.contents.push({
-      filter: getHttpServerOptions,
-      fullContent: getHttpServerOptionsContent,
-    });
-    appendInfo.contents.push({
-      filter: getHttpsServerOptions,
-      fullContent: getHttpsServerOptionsContent,
-    });
-  }
+  // } else {
+  //   appFileContent = ejs.render(fs.readFileSync(getTemplateFile('external.ts'), { encoding: 'utf8' }), { app });
+  //   appendInfo.header = externalAppProcessorHeader;
+  //   appendInfo.contents.push({
+  //     filter: getHttpServerOptions,
+  //     fullContent: getHttpServerOptionsContent,
+  //   });
+  //   appendInfo.contents.push({
+  //     filter: getHttpsServerOptions,
+  //     fullContent: getHttpsServerOptionsContent,
+  //   });
+  // }
   fs.writeFileSync(appFileName, appFileContent);
   await appendFunctionsToTsFile(appendInfo);
   apps.push(app.name);

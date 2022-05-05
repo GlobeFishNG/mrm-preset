@@ -15,6 +15,10 @@ import * as processor from './<%= apiName %>.routerprocessor';
 <%- bundledJoiStrings %>
 export function router(): express.Router {
   const myRouter = express.Router();
+  myRouter.use((_req, _res, next) => { 
+    traceSession.setData('serviceCode', '<%= apiCode %>');
+    next();
+  });
 <% paths.forEach((path) => { -%>
 <% path.operations.forEach((operation) => { -%>
   myRouter.<%= operation.method %>('<%= path.uri %>', validate<%= operation.name %>, processor.process<%= operation.name %>());
@@ -29,7 +33,6 @@ function validate<%= operation.name %>(
   req: express.Request,
   _res: express.Response,
   next: express.NextFunction): void {
-  traceSession.setData('serviceCode', '<%= apiCode %>');
   traceSession.setData('operationId', '<%= operation.operationCode %>');
   let result: Joi.ValidationResult;
 <% for(let key in operation.validator) { -%>
