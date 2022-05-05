@@ -118,7 +118,7 @@ const errorHandlerContent =
     const errorDetails = err.valueObject;
     res.status(err.valueObject.statusCode).json({
       errorCode: \`\${errorDetails.serviceCode}-\${errorDetails.operationId}--\${err.code}\`,
-      errorMsg: \`Invalid request:\${errorDetails.errorMsg}!\`,
+      errorMsg: errorDetails.errorMsg,
     });
   } else {
     res.status(500).json({

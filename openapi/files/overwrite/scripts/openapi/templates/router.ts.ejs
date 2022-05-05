@@ -36,7 +36,8 @@ function validate<%= operation.name %>(
   result = <%= operation.validator[key] %>.validate(req.<%= key %>);
   if (result.error) {
     return next(
-      createHttpError(HttpErrorCode.BadRequest, result.error.message)
+      createHttpError(HttpErrorCode.BadRequest, `Invalid request:${result.error.message}!`)
+
     );
   }
 <% } -%>
