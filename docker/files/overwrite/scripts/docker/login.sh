@@ -14,8 +14,10 @@ if [[ $profile =~ ((default)|(^aws)) ]]; then
   aws ecr get-login-password | \
     docker login --username AWS --password-stdin ${NGIQ_DOCKER_REPO_URI}
 else
-  aliyun cr GetAuthorizationToken | \
-    jq -r .data.authorizationToken | \
+  export NGIQ_ALIYUN_CR_INSTANCE_ID="cri-2bp27pwaqbe7w5t2"
+  aliyun cr GetAuthorizationToken --InstanceId $NGIQ_ALIYUN_CR_INSTANCE_ID \
+    --force --version 2018-12-01 --region cn-hangzhou | \
+    jq -r .AuthorizationToken | \
     docker login --username=cr_temp_user --password-stdin ${NGIQ_DOCKER_REPO_DOMAIN}
 fi
 

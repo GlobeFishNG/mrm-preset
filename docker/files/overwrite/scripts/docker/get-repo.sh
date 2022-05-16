@@ -9,11 +9,11 @@ function get_ngiq_docker_repo() {
       exit -1
     fi
   else
-    repo_namespace=ngiq-cr
-    repo_domain=$(aliyun cr GetRepo --RepoName=${npm_package_name} --RepoNamespace=${repo_namespace} | jq -r .data.repo.repoDomainList.public)  
-    if [[ -z $repo_domain ]]; then
-      echo "Cannot find repository ${npm_package_name}  - please create it manually in the CR console"
-      exit 1
+    repo_domain="ngiq-registry.cn-hangzhou.cr.aliyuncs.com"
+    if [[ $profile = "aliyun-prod" ]]; then
+      repo_namespace=ngiq-prod-cr
+    else
+      repo_namespace=ngiq-cr
     fi
     repo_uri="${repo_domain}/${repo_namespace}/$npm_package_name"
   fi

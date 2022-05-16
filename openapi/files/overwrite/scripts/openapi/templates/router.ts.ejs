@@ -34,12 +34,11 @@ function validate<%= operation.name %>(
   _res: express.Response,
   next: express.NextFunction): void {
   traceSession.setData('operationId', '<%= operation.operationCode %>');
-  let result: Joi.ValidationResult;
 <% for(let key in operation.validator) { -%>
-  result = <%= operation.validator[key] %>.validate(req.<%= key %>);
-  if (result.error) {
+  const <%= key %>ValidationResult: Joi.ValidationResult = <%= operation.validator[key] %>.validate(req.<%= key %>);
+  if (<%= key %>ValidationResult.error) {
     return next(
-      createHttpError(HttpErrorCode.BadRequest, `Invalid request:${result.error.message}!`)
+      createHttpError(HttpErrorCode.BadRequest, `Invalid request:${<%= key %>ValidationResult.error.message}!`)
 
     );
   }
